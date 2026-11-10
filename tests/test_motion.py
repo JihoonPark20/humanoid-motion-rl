@@ -3,7 +3,6 @@ import pytest
 
 from zest.envs.g1.config import JOINT_NAMES
 from zest.motion.library import MotionClip, validate_motion, velocities
-from zest.scripts.prepare_data import convert
 from zest.utils.math import difference, inverse_rotate, rotate, slerp
 
 
@@ -16,14 +15,13 @@ def test_antipodal_quaternions_and_pi_rotation():
     np.testing.assert_allclose(inverse_rotate(q, rotate(q, v)), v)
 
 
-def test_conversion_quaternion_joint_mapping_and_crop(tmp_path, model):
-    raw = np.repeat(model.qpos0[None], 61, axis=0)
-    raw[:, 0] = np.arange(61) / 30
-    raw[:, 3:7] = [0, 0, np.sin(0.25), np.cos(0.25)]  # CSV xyzw
-    raw[:, 7:] = np.arange(29) * 0.01
-    source = tmp_path / "input.csv"
-    np.savetxt(source, raw, delimiter=",")
-    path = convert(source, tmp_path / "out.npz", start=0.5, seconds=1.0)
+def test_motion_sampling_joint_order_and_terminal_dwell(tmp_path, model):
+    qpos = np.repeat(model.qpos0[None], 51, axis=0)
+    qpos[:, 0] = np.arange(51) / 50
+    qpos[:, 3:7] = [np.cos(0.25), 0, 0, np.sin(0.25)]
+    qpos[:, 7:] = np.arange(29) * 0.01
+    path = tmp_path / "walk.npz"
+    np.savez(path, version=1, qpos=qpos, fps=50.0, joint_names=JOINT_NAMES, quaternion_order="wxyz")
     clip = MotionClip(path, model)
     sample = clip.sample(np.array([0.5]))
     assert clip.duration == 1

@@ -19,7 +19,7 @@ viewer = ["mjviser==0.0.16; python_version >= '3.11'"]
 zest-train = "zest.scripts.train:main"
 zest-play = "zest.scripts.play:main"
 zest-evaluate = "zest.scripts.evaluate:main"
-zest-data = "zest.scripts.prepare_data:main"
+zest-data = "zest.scripts.hold_data:main"
 humble-data = "zest.scripts.hold_data:main"
 humble-train = "zest.scripts.humble_train:main"
 humble-play = "zest.scripts.humble_play:main"

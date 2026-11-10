@@ -5,7 +5,7 @@ Validated locally on **2026-11-10**, Apple M1 Max (32 GB), macOS 15.2, Python 3.
 ## Checks
 
 - Rotation conventions, antipodal quaternions and angular velocity differentiation.
-- CSV quaternion/joint mapping, resampling/cropping, FK, terminal dwell and invalid-input rejection.
+- HOLD HDF5 timestamp/named-joint conversion, motion sampling, FK, terminal dwell and invalid-input rejection.
 - Adaptive probabilities, valid clip bins, early-failure scoring, duplicate-bin EMA and curriculum restore.
 - Wrench gravity/feedforward terms; ground reaction force direction and approximate weight balance.
 - Actor isolation from measured root translation/velocity, immutable observation snapshots, residual targets.
@@ -21,28 +21,6 @@ uv sync --extra dev
 uv run ruff check zest tests
 uv run pytest -q
 ```
-
-## Real-data execution check
-
-The first 10 seconds of Unitree's `walk1_subject1` were converted to 50 Hz. The final code ran **100 PPO iterations × 24 steps × 32 environments = 76,800 transitions** on MPS, with four CPU simulation threads. Training completed in approximately 49 seconds on this machine. This is one small local measurement, not a general throughput guarantee.
-
-Local artifacts (git-ignored):
-
-- `logs/g1_verified/model_99.pt`: checkpoint after 100 completed iterations.
-- `logs/g1_verified/run_config.json`: exact settings, asset/motion hashes and versions.
-- `logs/g1_resume_cpu/model_101.pt`: same checkpoint resumed for two additional iterations on CPU.
-- `logs/g1_verified/evaluations/{nominal,randomized}.{json,csv}`: full evaluation outputs.
-
-Both evaluations use seeds 0/1 and four environments per seed, start from frame zero, and disable assistance. The nominal evaluation used MPS inference; randomized evaluation used CPU inference. These are execution checks, not a controlled device-performance comparison.
-
-| Evaluation | Completed rollouts | Mean completion | Mean joint MAE over realized steps |
-| --- | ---: | ---: | ---: |
-| Nominal | 0 / 8 | 11.57% | 0.0959 rad |
-| Randomized | 0 / 8 | 12.21% | 0.1043 rad |
-
-**The policy has not converged.** Errors over short failed rollouts do not establish good full-motion tracking. Nominal rollouts are deterministic duplicates, and this is the training clip, not a held-out skill. The paper uses a much larger environment/batch budget. Longer training, multiple seeds, more motions and assistance-off ablations remain necessary for claims about ZEST performance. CUDA, Linux runtime, athletic skills and real hardware have not been validated.
-
-During implementation, an incorrect combination of locked whole-body inertia, pelvis feedback and torso actuation destabilized assistance. The final version uses the documented torso-frame controller and passed the real-data run. Superseded diagnostics are archived locally under `.cache/validation_drafts/` and are not compatible reference checkpoints.
 
 ## HuMBLE flat-ground implementation
 

@@ -6,10 +6,10 @@ The flat-ground pipeline implements teacher PPO, online student-rollout distilla
 
 ```bash
 uv sync --extra dev
-uv run humble-data --seconds 30
+uv run zest-data --seconds 30 --height-offset 0.005
 ```
 
-The importer downloads a pinned, checksum-verified HOLD G1 HDF5, reads its timestamps and joint names, resamples to 50 Hz, generates torso-frame commands and audits every converted frame for joint limits and floor penetration. Raw files are immutable. Converted files include source hashes, crop bounds, coordinate assumptions and annotation parameters; existing outputs are not overwritten. License attribution is retained with downloads.
+The shared `zest-data` importer (`humble-data` is an alias) downloads a pinned, checksum-verified HOLD G1 HDF5, reads its timestamps and joint names, resamples to 50 Hz, generates torso-frame commands and audits every converted frame for joint limits and floor penetration. Raw files are immutable. Converted files include source hashes, crop bounds, coordinate assumptions and annotation parameters; existing outputs are not overwritten. License attribution is retained with downloads. The command above uses the same explicit walking-clip height offset as the README.
 
 Use `--clips walk/S0_normal_walk_1.h5 ...` for additional release paths, or `--source FILE.h5 ...` for local data. `--height-offset METRES` applies an explicit recorded vertical translation, never an automatic correction. The default is zero. `--start`, `--seconds`, `--cutoff` and `--anticipation` control conversion. Use a separate output directory for changed preprocessing.
 

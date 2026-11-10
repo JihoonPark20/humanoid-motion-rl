@@ -1,37 +1,26 @@
 # Motion data
 
-## Recommendation for HuMBLE: HOLD
+## Default for ZEST and HuMBLE: HOLD
 
-Use [HOLD's G1 locomotion trajectories](https://github.com/rai-opensource/hold/tree/f80b04d384d4ec8922c88deada878c88597a3cf9/data/g1/locomotion) for HuMBLE. The release includes robot-space motion and uses CC BY 4.0. `humble-data` implements pinned download, conversion, command annotation and per-clip kinematic audits; a full-dataset quality audit remains outstanding. See the [implementation guide](humble.md) for commands and the [feasibility review](humble-review.md) for observed timing, geometry and data-quality issues. This recommendation concerns suitability for this task, not a benchmark claiming universal dataset quality.
-
-## Currently supported dataset: Unitree-retargeted LAFAN1
-
-Use [Unitree's G1 LAFAN1 trajectories](https://huggingface.co/datasets/lvhaidong/LAFAN1_Retargeting_Dataset) for the first experiments. They provide 30 Hz robot-space motion with a documented joint order, avoiding a separate human-to-robot retargeting pipeline. Retargeting considers kinematics; it does not guarantee dynamically feasible trajectories. This is a practical starting recommendation, not a claim that this dataset is universally highest quality.
-
-The downloader pins revision `ce1572906efe6157840e8474d5a0d7aa87481e74`, retains the upstream README/license, and records each source SHA-256 and crop interval. Motion content is governed by LAFAN1's CC BY-NC-ND 4.0 terms; code/model licenses are separate. Downloaded and converted data stay under git-ignored `data/`; they are not included in the package.
+Use [HOLD's G1 locomotion trajectories](https://github.com/rai-opensource/hold/tree/f80b04d384d4ec8922c88deada878c88597a3cf9/data/g1/locomotion) for both learners. RAI Institute and Boston Dynamics released HOLD and used it in HuMBLE; the release provides G1-retargeted motion under CC BY 4.0. Choosing HOLD for ZEST is a local dataset adaptation, not a claim about ZEST's original training data. `zest-data` implements pinned download, conversion, command annotation and per-clip kinematic audits. `humble-data` remains an alias. Both learners accept the resulting NPZ files; ZEST uses the motion references, while HuMBLE also uses the command annotations.
 
 ```bash
-# Short first experiment (walk1_subject1, first 10 seconds).
-zest-data --seconds 10
+# Default clip: walk/S0_normal_walk_1.h5, output: data/hold/.
+zest-data --seconds 30 --height-offset 0.005
+zest-view --motion data/hold/S0_normal_walk_1.npz
 
-# Separate output avoids overwriting a short reference used by an existing checkpoint.
-zest-data --all --output data/lafan1_full
-
-# Another clip, or your own already-retargeted Unitree-format CSV.
-zest-data --clips dance1_subject1 --seconds 10 --output data/lafan1_dance
-zest-data --source /path/to/g1.csv --output data/custom
+# Additional clips: choose release paths and a separate output directory.
+zest-data --clips walk/S0_normal_walk_1.h5 --seconds 30 --output data/hold_unmodified
 ```
 
-The CSV importer expects headerless rows: root XYZ in metres, root quaternion **XYZW**, then 29 joint angles in radians in the dataset's declared order. It converts to **WXYZ**, resamples at 50 Hz using linear translation/joint interpolation and quaternion SLERP, and removes the initial horizontal translation. It does not silently clamp joints, filter motion, or fix ground penetration. Inspect new motions using `zest-play --reference --motion FILE.npz` before long training.
+The quick start explicitly applies a +0.005 m vertical offset to this walking clip because of floor penetration in the local G1 geometry. The importer itself defaults to zero offset, records the choice and never overwrites prepared files. This correction is not a dataset-wide default. A single walk does not cover the commands needed for a general locomotion policy. See the [HuMBLE guide](humble.md) for the prepared eight-clip subset, additional imports and recording-group splits. A full-dataset quality audit remains outstanding; the [feasibility review](humble-review.md) documents observed timing, geometry and data-quality issues.
 
-Internal NPZ version 1 stores `qpos[frames,36]`, scalar `fps`, `joint_names[29]`, `quaternion_order="wxyz"`, and provenance metadata; loading never enables pickle. MuJoCo forward kinematics provides body references. World linear/angular velocities and accelerations are finite-differenced; free-joint angular velocity is converted into MuJoCo's local convention. The final pose is held with zero reference velocity during dwell.
+## Conversion and format
 
-## Expansion candidates
+The importer reads HOLD HDF5 timestamps, named joints and WXYZ root quaternions. It resamples to 50 Hz with linear translation/joint interpolation and quaternion SLERP, and removes initial horizontal translation. Height offsets must be explicitly requested; joint angles are not silently clamped. Each conversion records the pinned revision, source hash, crop bounds, command annotation settings and geometry audit. Downloaded and converted data stay under git-ignored `data/` and are not packaged; source license attribution is retained with downloads.
 
-| Dataset | Fit for this project | Additional work |
-| --- | --- | --- |
-| [AMASS](https://amass.is.tue.mpg.de/) | Broad optical motion-capture coverage; useful for a larger skill library | Registration, applicable dataset/model terms, and G1 retargeting; [GMR](https://github.com/YanjieZe/GMR) is one possible tool |
-| [BONES-SEED](https://huggingface.co/datasets/bones-studio/seed) | Large motion library with G1 output and annotations | User acceptance of access conditions; a separate importer for its documented units/layout |
-| Unitree LAFAN1 | Small enough for local iteration, directly usable G1 references | Inspect dynamic feasibility and select clips |
+Internal NPZ version 1 stores `qpos[frames,36]`, scalar `fps`, `joint_names[29]`, `quaternion_order="wxyz"`, provenance metadata and HuMBLE command annotations. Loading never enables pickle. MuJoCo forward kinematics provides body references. World linear/angular velocities and accelerations are finite-differenced; free-joint angular velocity is converted into MuJoCo's local convention. The final pose is held with zero reference velocity during dwell.
 
-Neither alternative has been downloaded or benchmarked here. Use held-out subjects/clips for generalization claims. Evaluating the training reference measures tracking of that reference, not unseen-skill generalization. Start with one short walk, then add dance/jump and multi-contact clips; do not interpret a single walk experiment as validation of athletic control.
+## Evaluation splits
+
+Keep each original recording, its mirrored counterpart and all crops in the same partition. Evaluate held-out recordings separately; training-reference tracking does not measure generalization. Expand locomotion coverage within HOLD after verifying a short walking reference. A single walk does not validate broad locomotion or athletic control.
