@@ -1,0 +1,15 @@
+{
+  "env": {
+    "num_envs": 64,
+    "num_threads": 6,
+    "curriculum": "success_decay",
+    "randomize": true,
+    "observation_noise": true,
+    "goal_fraction": 0.5,
+    "command_low": [-0.8, -0.6, -1.5],
+    "command_high": [1.2, 0.6, 1.5]
+  },
+  "train": {
+    "num_steps_per_env": 24
+  }
+}
