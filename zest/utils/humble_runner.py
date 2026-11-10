@@ -13,6 +13,7 @@ import torch
 from rsl_rl.models import MLPModel
 from torch.utils.tensorboard import SummaryWriter
 
+from zest.utils.console import TrainingConsole
 from zest.utils.runner import TrackingPPO, training_config
 
 
@@ -283,6 +284,7 @@ class HumbleRunner:
 
         previous = {sig: signal.signal(sig, stop) for sig in (signal.SIGINT, signal.SIGTERM)}
         writer = SummaryWriter(str(directory))
+        console = TrainingConsole(self.iteration, iterations)
         reason = "iteration_limit"
         try:
             with (directory / "metrics.jsonl").open("a") as stream:
@@ -296,9 +298,14 @@ class HumbleRunner:
                     self.total_seconds += elapsed
                     self.iteration += 1
                     if eval_interval and self.iteration % eval_interval == 0:
+                        console.note(f"Evaluating unassisted tracking at iteration {self.iteration}...")
                         evaluation_start = time.monotonic()
                         metrics.update(self.evaluate_references(directory))
                         self.total_seconds += time.monotonic() - evaluation_start
+                        console.note(
+                            f"Reference evaluation | completion {metrics['Unassisted/completion']:.1%} "
+                            f"| success {metrics['Unassisted/success']:.1%}"
+                        )
                     metrics.update(
                         iteration=self.iteration,
                         elapsed_seconds=self.total_seconds,
@@ -322,9 +329,9 @@ class HumbleRunner:
                                 indent=2,
                             )
                         )
-                        print(json.dumps(metrics), flush=True)
                     if self.iteration % (10 * save_interval) == 0:
                         self.save(directory / f"model_{self.iteration}.pt")
+                    console.update(metrics, report="Unassisted/completion" in metrics)
             self.save(directory / "latest.pt")
             (directory / "status.json").write_text(
                 json.dumps(
@@ -334,7 +341,9 @@ class HumbleRunner:
                     indent=2,
                 )
             )
+            console.finish(reason, self.iteration, directory / "latest.pt")
         finally:
+            console.close()
             writer.close()
             for sig, handler in previous.items():
                 signal.signal(sig, handler)

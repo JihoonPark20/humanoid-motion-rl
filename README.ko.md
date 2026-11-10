@@ -42,7 +42,7 @@ humble-train --stage warmup --init PRIOR.pt --device mps --iterations 5000
 humble-train --stage finetune --init WARMUP.pt --device mps --iterations 20000
 ```
 
-`TEACHER.pt`, `PRIOR.pt`, `WARMUP.pt`를 `logs/humble/` 아래 이전 단계의 `latest.pt` 경로로 바꾸세요. 증류 전에 보조 힘 없는 교사의 추종 성능을 확인합니다. 반복 횟수는 예시이며 수렴을 보장하지 않습니다. NVIDIA에서는 `--device cuda`, 병렬도 조절은 `--num-envs`와 `--num-threads`를 사용합니다. 단계별 설명과 준비된 8개 클립 구성은 [HuMBLE 가이드](docs/humble.md)를 참고하세요.
+`TEACHER.pt`, `PRIOR.pt`, `WARMUP.pt`를 `logs/humble/` 아래 이전 단계의 `latest.pt` 경로로 바꾸세요. 증류 전에 보조 힘 없는 교사의 추종 성능을 확인합니다. 반복 횟수는 예시이며 수렴을 보장하지 않습니다. NVIDIA에서는 `--device cuda`, 병렬도 조절은 `--num-envs`와 `--num-threads`를 사용합니다. 단계별 설명과 8개 클립 준비 예제은 [HuMBLE 가이드](docs/humble.md)를 참고하세요.
 
 ## 시각화·평가·재개
 

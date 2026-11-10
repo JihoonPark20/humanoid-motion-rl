@@ -28,18 +28,14 @@ Also validated on 2026-11-10, with h5py 3.16.0 added. **22 tests passed, 2 CUDA 
 
 All four learning stages were updated on CPU and MPS. Tests verify that the distillation teacher remains frozen, critic warm-start changes the critic while preserving the entire actor state (including normalization), checkpoints transfer between stages, and CPU resume preserves saved policy state. Periodic evaluation leaves the training simulator and actor state unchanged. A STOP-file execution test saved a valid checkpoint without performing another iteration. The final student's command playback ran without source motion files, including 30 steps in the native macOS viewer. These checks do not establish policy quality.
 
-Real HOLD execution artifacts (ignored locally):
+Historical HOLD execution checks (development artifacts are not distributed):
 
-- `logs/humble_check_{teacher,distill,warmup,finetune}/latest.pt`: two tiny-network iterations per stage on MPS. The final command evaluation completed 0/16 rollouts, with about 20.2% mean completion; this is a deliberately tiny execution check.
-- `logs/humble_teacher_pilot/latest.pt`: 100 iterations × 24 steps × 32 environments = 76,800 transitions, using full-size teacher/critic networks on MPS. Updates took approximately 47.2 seconds. Unassisted reference evaluation completed 0/8 rollouts, with 6.27% mean completion on the 10-second training clip.
-- `logs/humble_flat_pilot/latest.pt`: 25 iterations × 24 × 64 environments = 38,400 transitions on the eight-clip, 30-second subset. Updates took approximately 20.75 seconds without numerical failures.
-- `logs/humble_flat_resume_check/latest.pt`: one more MPS iteration from that checkpoint, followed by automatic unassisted evaluation of all eight training references. Completion was 1.81%, with 0/8 completed rollouts. This validates resume and monitoring; the policy is not yet a useful teacher.
+- **Four-stage smoke check:** two tiny-network iterations per stage on MPS. The final command evaluation completed 0/16 rollouts, with about 20.2% mean completion; this is a deliberately tiny execution check.
+- **Single-clip teacher pilot:** 100 iterations × 24 steps × 32 environments = 76,800 transitions, using full-size teacher/critic networks on MPS. Updates took approximately 47.2 seconds. Unassisted reference evaluation completed 0/8 rollouts, with 6.27% mean completion on the 10-second training clip.
+- **Eight-clip teacher pilot:** 25 iterations × 24 × 64 environments = 38,400 transitions on the eight-clip, 30-second subset. Updates took approximately 20.75 seconds without numerical failures.
+- **Resume and monitoring check:** one more MPS iteration from that checkpoint, followed by automatic unassisted evaluation of all eight training references. Completion was 1.81%, with 0/8 completed rollouts. This validates resume and monitoring; the policy is not yet a useful teacher.
 
 The small dataset contains four original recordings and four mirrors, not eight independent skills. Full-dataset coverage, held-out generalization, convergence, DTW-based paper comparisons, rough terrain, Linux runtime and CUDA remain unverified. The [HuMBLE guide](humble.md) records the actuator, curriculum, annotation, contact and randomization differences.
-
-A bounded **48-hour teacher run** was launched from the 26-iteration flat-ground checkpoint at `logs/humble/teacher_48h`, using 64 environments, six simulation threads and MPS. `run_config.json` records the start time, package versions and source hashes; `status.json`, `metrics.jsonl` and `logs/humble/teacher_48h.console.log` contain live state. The launch uses macOS `caffeinate -i` for idle-sleep inhibition. It saves every 100 iterations and evaluates the training references without assistance every 1,000. This record confirms launch, not completion or convergence; inspect the live status for the current result. No automatic transition to distillation is scheduled.
-
-The user subsequently requested manual control of training. The job was **stopped at iteration 185**, its final checkpoint was verified against `status.json`, and process exit was confirmed. The old STOP file is retained; resume commands create a new run directory.
 
 ## Viser playback
 

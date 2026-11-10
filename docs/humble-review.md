@@ -116,7 +116,7 @@ Use explicit small development configurations and separately recorded reproducti
 
 ## Recommended implementation sequence and acceptance gates
 
-Proposed extensions can remain under `zest/`: `motion/hold.py` and `motion/commands.py` for data, `envs/g1/humble.py` for task variants, `utils/distillation.py` and `utils/multitask_ppo.py` for learning. These are proposed modules, not existing commands. Keep the common simulator/assets and the already archived upstream provenance; there is no need to restore the full external repository.
+Proposed extensions can remain under `zest/`: `motion/hold.py` and `motion/commands.py` for data, `envs/g1/humble.py` for task variants, `utils/distillation.py` and `utils/multitask_ppo.py` for learning. These are proposed modules, not existing commands. Keep the common simulator/assets and the retained upstream provenance; there is no need to restore the full external repository.
 
 | Milestone | Deliverable | Evidence required before proceeding |
 | --- | --- | --- |
@@ -135,4 +135,4 @@ The decisions still useful from the user are the initial inclusion of rough terr
 
 ## Work performed for this review
 
-Read the HuMBLE paper and supplementary tables, ZEST abstract, HOLD README and G1/processing documentation; inspected the current environment, simulator and installed PPO/distillation code; enumerated pinned LFS metadata; downloaded and hash-verified two HDF5 samples; checked schema, timing, joint limits and provisional FK/contact compatibility. Research downloads remain under ignored `.cache/research/`. No full HOLD training, HuMBLE implementation, CUDA run or policy-quality benchmark was performed. README language links and local documentation links were checked after editing.
+Read the HuMBLE paper and supplementary tables, ZEST abstract, HOLD README and G1/processing documentation; inspected the current environment, simulator and installed PPO/distillation code; enumerated pinned LFS metadata; downloaded and hash-verified two HDF5 samples; checked schema, timing, joint limits and provisional FK/contact compatibility. Research downloads are not included in the distribution. No full HOLD training, HuMBLE implementation, CUDA run or policy-quality benchmark was performed. README language links and local documentation links were checked after editing.

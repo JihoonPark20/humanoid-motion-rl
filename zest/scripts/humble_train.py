@@ -100,7 +100,12 @@ def main():
             )
         )
         (directory / "status.json").write_text(json.dumps(dict(status="running", pid=os.getpid()), indent=2))
-        print(f"HuMBLE {cfg.stage}: {cfg.num_envs} CPU environments, learner={device}, log={directory}", flush=True)
+        print(
+            f"HuMBLE / {cfg.stage} | {device.upper()} learner | {cfg.num_envs} CPU environments\n"
+            f"Run: {directory}\n"
+            f"Training: {args.iterations:,} additional iterations | Ctrl+C to save and stop",
+            flush=True,
+        )
         runner.learn(directory, args.iterations, save_interval=args.save_interval, eval_interval=args.eval_interval)
     except Exception as error:
         (directory / "status.json").write_text(json.dumps(dict(status="failed", error=str(error)), indent=2))

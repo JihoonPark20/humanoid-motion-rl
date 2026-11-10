@@ -8,11 +8,11 @@ Requires Python 3.11–3.13 for the optional viewer dependencies. Core training 
 uv sync --extra viewer
 
 # Reference motion only, without a checkpoint.
-uv run --extra viewer zest-view --motion data/hold_flat/S0_normal_walk_1.npz
+uv run --extra viewer zest-view --motion data/hold/S0_normal_walk_1.npz
 
-# Current teacher: open paused, with Reference/Policy selection.
+# Teacher checkpoint: open paused, with Reference/Policy selection.
 uv run --extra viewer zest-view \
-  --checkpoint logs/humble/teacher_48h/latest.pt --reference --paused
+  --checkpoint PATH_TO_TEACHER.pt --reference --paused
 
 # A trained student: velocity sliders; reference files are unnecessary.
 uv run --extra viewer zest-view --checkpoint PATH_TO_STUDENT.pt

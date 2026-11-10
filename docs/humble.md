@@ -13,7 +13,18 @@ The shared `zest-data` importer (`humble-data` is an alias) downloads a pinned, 
 
 Use `--clips walk/S0_normal_walk_1.h5 ...` for additional release paths, or `--source FILE.h5 ...` for local data. `--height-offset METRES` applies an explicit recorded vertical translation, never an automatic correction. The default is zero. `--start`, `--seconds`, `--cutoff` and `--anticipation` control conversion. Use a separate output directory for changed preprocessing.
 
-For the initial local experiment, `data/hold_flat/` contains the first 30 s of four recordings and their provided mirrors: `S0_normal_walk_1`, `normal_sidestep`, `shuffle_turn_in_place`, and `shuffle_start`. Walking clips have a recorded +0.005 m height offset because the unmodified local geometry slightly exceeded the 0.03 m penetration termination; other clips are unchanged. All 12,008 converted frames were checked, with no joint-limit violation above 1e-5 rad. Maximum remaining penetration is approximately 0.02503 m. This is a small training subset, not a full HOLD benchmark or a certified retargeting result. Backward and sprint coverage remain limited.
+The eight-clip example uses `data/hold_flat/` with the first 30 s of four recordings and their provided mirrors: `S0_normal_walk_1`, `normal_sidestep`, `shuffle_turn_in_place`, and `shuffle_start`. Walking clips have a recorded +0.005 m height offset because the unmodified local geometry slightly exceeded the 0.03 m penetration termination; other clips are unchanged. All 12,008 converted frames were checked, with no joint-limit violation above 1e-5 rad. Maximum remaining penetration is approximately 0.02503 m. This is a small training subset, not a full HOLD benchmark or a certified retargeting result. Backward and sprint coverage remain limited.
+
+Prepare this subset once in a fresh checkout (downloaded data is not distributed with the repository):
+
+```bash
+uv run zest-data --seconds 30 --height-offset 0.005 --output data/hold_flat \
+  --clips walk/S0_normal_walk_1.h5 walk/S0_normal_walk_1_mirrored.h5
+uv run zest-data --seconds 30 --output data/hold_flat \
+  --clips sidestep/normal_sidestep.h5 sidestep/normal_sidestep_mirrored.h5 \
+  shuffle/shuffle_turn_in_place.h5 shuffle/shuffle_turn_in_place_mirrored.h5 \
+  shuffle/shuffle_start.h5 shuffle/shuffle_start_mirrored.h5
+```
 
 Keep each original/mirror pair and all crops from a recording in the same partition. Do not use the mirrored training clip as held-out evidence. Evaluation accepts separate `--motions` explicitly; the initial eight-clip experiment has no independent held-out benchmark yet. `metadata.recording_group` records the original recording name.
 
@@ -42,11 +53,13 @@ uv run humble-train --stage finetune --init logs/humble/warmup/latest.pt \
   --device mps --iterations 20000 --log-dir logs/humble/finetune
 ```
 
-`--iterations` specifies additional optimization iterations for each invocation, including resumed runs. The initial local experiment was teacher-only and is now stopped. Do not automatically distill an unsuccessful teacher. `--tiny` selects small test networks, while normal runs use the paper-sized MLPs. For a tiny pipeline, use `--tiny` consistently. `--config` can override `env` fields and `train` fields; defaults for non-teacher stages use a fixed 1e-6 learning rate. Reduced environment counts change the optimization regime relative to the paper's 4,096 environments.
+`--iterations` specifies additional optimization iterations for each invocation, including resumed runs. Do not automatically distill an unsuccessful teacher. `--tiny` selects small test networks, while normal runs use the paper-sized MLPs. For a tiny pipeline, use `--tiny` consistently. `--config` can override `env` fields and `train` fields; defaults for non-teacher stages use a fixed 1e-6 learning rate. Reduced environment counts change the optimization regime relative to the paper's 4,096 environments.
 
 ## Monitor, stop and resume
 
 Runs write `metrics.jsonl`, TensorBoard events, `run_config.json`, `status.json` and atomic `latest.pt`. A numbered checkpoint is retained every ten save intervals. `--save-interval` defaults to 100 iterations. `status.json` includes a process ID while running. An exception records a failed status; the last successfully written checkpoint remains available.
+
+Interactive terminals show a single updating progress line with iteration count, estimated remaining time and the metrics that fit the terminal width. Evaluation results and the final checkpoint path appear separately. Redirected output uses plain summary lines every 100 iterations, at the first/final update and after evaluations. Full metrics still go to JSONL and TensorBoard every iteration. Progress and ETA cover the additional iterations requested for this invocation; the iteration counter includes previous training. Training similarity may use assistance and is not an unassisted success rate. Console changes apply when starting or resuming a process.
 
 Every 1,000 iterations, a separate assistance-free environment evaluates the training references without altering the training simulator or policy. Results are saved as `reference_evaluation_ITERATION.json`; `best_reference.pt` retains the best mean completion. This is training-set monitoring, not held-out validation. Set `--eval-interval` to change the interval or zero to disable it. Training ends after the requested iterations or a manual stop.
 
@@ -97,14 +110,3 @@ The first evaluator is a reproducible local diagnostic, not the complete paper b
 - **Data/resources:** Full FK/differentiation uses CPU float64, then resident motion arrays use float32. Loading is still eager; benchmark memory before using the entire release. Physics remains CPU even with a CUDA learner. No AMP, CUDA kernel or alternate MDP is required for the portable path.
 
 Training loss or assisted similarity alone is insufficient evidence of success. The next scientific gate is unassisted teacher completion across the motion library, followed by held-out and command-policy comparisons. Hardware deployment, box climbing and hierarchical parkour remain outside this version.
-
-## Current local checkpoint
-
-The previously launched teacher job was stopped at the user's request after **185 completed iterations**. Its final checkpoint is `logs/humble/teacher_48h/latest.pt`; the training process and idle-sleep inhibitor have exited. No further training is scheduled. To continue it manually, use a new run directory:
-
-```bash
-uv run humble-train --resume logs/humble/teacher_48h/latest.pt \
-  --device mps --iterations 1000000
-```
-
-Omitting `--log-dir` creates a timestamped directory, so the old STOP file does not stop the new run. To start a fresh teacher, use the teacher command above without `--resume`; CUDA uses `--device cuda` with an appropriate PyTorch installation.

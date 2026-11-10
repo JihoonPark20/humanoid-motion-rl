@@ -42,7 +42,7 @@ humble-train --stage warmup --init PRIOR.pt --device mps --iterations 5000
 humble-train --stage finetune --init WARMUP.pt --device mps --iterations 20000
 ```
 
-Replace `TEACHER.pt`, `PRIOR.pt` and `WARMUP.pt` with the previous stage's `latest.pt` under `logs/humble/`. Check unassisted teacher tracking before distillation. Iteration counts are examples, not convergence guarantees. Use `--device cuda` on NVIDIA; adjust parallelism with `--num-envs` and `--num-threads`. See the [HuMBLE guide](docs/humble.md) for stage details and the prepared eight-clip subset.
+Replace `TEACHER.pt`, `PRIOR.pt` and `WARMUP.pt` with the previous stage's `latest.pt` under `logs/humble/`. Check unassisted teacher tracking before distillation. Iteration counts are examples, not convergence guarantees. Use `--device cuda` on NVIDIA; adjust parallelism with `--num-envs` and `--num-threads`. See the [HuMBLE guide](docs/humble.md) for stage details and the eight-clip data preparation example.
 
 ## View, evaluate and resume
 

@@ -10,3 +10,9 @@ data/
 logs/
 .cache/
 MUJOCO_LOG.TXT
+.DS_Store
+.coverage
+.coverage.*
+htmlcov/
+.mypy_cache/
+.ipynb_checkpoints/

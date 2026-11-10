@@ -1,0 +1,14 @@
+prune .git
+prune .venv
+prune .cache
+prune .pytest_cache
+prune .ruff_cache
+prune .mypy_cache
+prune .ipynb_checkpoints
+prune data
+prune logs
+prune build
+prune dist
+prune htmlcov
+exclude .coverage .coverage.* MUJOCO_LOG.TXT
+global-exclude __pycache__ *.py[cod] .DS_Store

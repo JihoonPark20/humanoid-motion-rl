@@ -6,4 +6,4 @@
 - **PPO:** [rsl_rl](https://github.com/leggedrobotics/rsl_rl), installed as a dependency, with its original license retained.
 - **Default motion data:** [HOLD](https://github.com/rai-opensource/hold), released by RAI Institute and Boston Dynamics and used in [HuMBLE](https://arxiv.org/abs/2610.10489), under CC BY 4.0. This project uses the provided G1-retargeted trajectories. Dataset terms are separate from this project's code license; no dataset is included in source distributions or wheels.
 
-The imported repository's license files are retained even when their associated optional code is no longer used. The original imported directory is archived locally at `.cache/upstream/legged-gym-mujoco.tar.gz` before cleanup; it is not a runtime dependency and is not packaged.
+The imported repository's license files are retained even when their associated optional code is no longer used. The original imported repository is not a runtime dependency and is not packaged.

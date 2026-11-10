@@ -13,7 +13,7 @@ zest-view --motion data/hold/S0_normal_walk_1.npz
 zest-data --clips walk/S0_normal_walk_1.h5 --seconds 30 --output data/hold_unmodified
 ```
 
-The quick start explicitly applies a +0.005 m vertical offset to this walking clip because of floor penetration in the local G1 geometry. The importer itself defaults to zero offset, records the choice and never overwrites prepared files. This correction is not a dataset-wide default. A single walk does not cover the commands needed for a general locomotion policy. See the [HuMBLE guide](humble.md) for the prepared eight-clip subset, additional imports and recording-group splits. A full-dataset quality audit remains outstanding; the [feasibility review](humble-review.md) documents observed timing, geometry and data-quality issues.
+The quick start explicitly applies a +0.005 m vertical offset to this walking clip because of floor penetration in the local G1 geometry. The importer itself defaults to zero offset, records the choice and never overwrites prepared files. This correction is not a dataset-wide default. A single walk does not cover the commands needed for a general locomotion policy. See the [HuMBLE guide](humble.md) for the eight-clip preparation commands, additional imports and recording-group splits. A full-dataset quality audit remains outstanding; the [feasibility review](humble-review.md) documents observed timing, geometry and data-quality issues.
 
 ## Conversion and format
 
